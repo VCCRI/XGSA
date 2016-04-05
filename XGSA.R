@@ -9,7 +9,7 @@
 # host.ID
 # biomart.ID
 # homology.matrix.list
-# supported_species
+# supported.species
 #
 # Users should also check the names of functions loaded by this script
 #
@@ -38,13 +38,13 @@ find_supported_datasets <- function(default=TRUE){
 
 ##########################
 # This is stored globally at the start of the session to avoid having to be recalled
-supported_species <- find_supported_datasets()
+supported.species <- find_supported_datasets()
 
 ##########################
 # This function executes the paired Fisher's exact tests which form the basis of XGSA
 # It returns a single numeric p-value
 # Input parameters are the Ensembl gene IDs in the two species, corresponding to the rows and columns of the homology matrix, the homology matrix itself, maximum and minimum gene set sizes to be considered, and the two gene universes to consider.
-fisherspairstatuniverse<-function(row_genes, col_genes, homology_matrix, min=5, max=500, rowuniverse, coluniverse){
+paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=5, max=500, rowuniverse, coluniverse){
     
     #only test those genes that actually exist in the matrix
     row_genes <- as.character(row_genes[row_genes%in%rownames(homology_matrix)])
@@ -76,8 +76,11 @@ fisherspairstatuniverse<-function(row_genes, col_genes, homology_matrix, min=5, 
 }
 
 
-
-get.overlap.genes<-function(row_genes, col_genes, homology_matrix, min=5, max=500){
+##########################
+# This function returns the genes that overlap between the two sets
+# It returns a list with two vectors of gene IDs, matching thw row and column species of the homology table
+# Input parameters are the Ensembl gene IDs in the two species corresponding to the rows and columns of the homology matrix, the homology matrix itself, maximum and minimum gene set sizes to be considered.
+get_overlap_genes<-function(row_genes, col_genes, homology_matrix, min=5, max=500){
   
   #only test those genes that actually exist in the matrix
   row_genes <- as.character(row_genes[row_genes%in%rownames(homology_matrix)])
@@ -102,7 +105,7 @@ get.overlap.genes<-function(row_genes, col_genes, homology_matrix, min=5, max=50
 
 ##########################
 #this function generates a sparse matrix from a table with two or three columns: ID ID Value(optional)
-generate.sparse.matrix <- function(homology_table){
+generate_sparse_matrix <- function(homology_table){
   # Compare only genes with homology mapping
   homology_table <- unique(homology_table)[!unique(homology_table)[,2]=="",]
   
@@ -124,7 +127,7 @@ generate.sparse.matrix <- function(homology_table){
 ##########################
 # generates the best reciprocal hits matrix
 # note this can still give not perfect 1-1 mapping if homologs have identical sequence conservation in each direction
-generate.best.reciprocal.hits.matrix <- function(hms1, hms2, homology_table){
+generate_best_reciprocal_hits_matrix <- function(hms1, hms2, homology_table){
   
   # Need To Add: if there are no values in the matrices return failure
   # Compare only genes with homology mapping
@@ -143,7 +146,7 @@ generate.best.reciprocal.hits.matrix <- function(hms1, hms2, homology_table){
   
   sub_homology_table <- homology_table[reciprocal.include==1,]
   
-  hms_BRH <- generate.sparse.matrix(sub_homology_table)
+  hms_BRH <- generate_sparse_matrix(sub_homology_table)
   return(hms_BRH)
 }
 ###########################
@@ -206,7 +209,7 @@ get_ENSEMBL_symbol_map <- function(species){
 # Retrieves the GO term names and IDs of the latest Gene Ontology annotations from ENSEMBL
 # Returns a data frame containing GO terms and term names
 # Input parameter is the species string (eg. 'hsapiens')
-getGOTermNames <- function(species){
+get_GO_names <- function(species){
   require(biomaRt)
   dataset_name <- paste(species, "_gene_ensembl", sep="")
   ensembl <- useMart(biomart.ID, dataset=dataset_name, host=host.ID)
@@ -218,7 +221,7 @@ getGOTermNames <- function(species){
 # Retrieves the latest Gene Ontology annotations from ENSEMBL
 # Returns a data frame containing gene ids, associated go terms, GO evidence codes, and GO ontology type (BP, MF, CC)
 # Input parameter is the species string (eg. 'hsapiens')
-getGOMappings <- function(species){
+get_GO_mappings <- function(species){
   require(biomaRt)
   dataset_name <- paste(species, "_gene_ensembl", sep="")
   ensembl <- useMart(biomart.ID, dataset=dataset_name, host=host.ID)
@@ -230,8 +233,8 @@ getGOMappings <- function(species){
 # Retrieves GO mappings and converts the result into a list
 # Returns a list of GO terms with constituent ENESMBL gene IDS
 # Input parameter is the species string (eg. 'hsapiens')
-getGOTerms <- function(species){
-  GOMap <- getGOMappings(species)
+get_GO_list <- function(species){
+  GOMap <- get_GO_mappings(species)
   GOTerms <- split(GOMap$ensembl_gene_id, GOMap$go_id)
   return(GOTerms)
 }
@@ -241,8 +244,8 @@ getGOTerms <- function(species){
 # Returns a list of GO terms with constituent ENESMBL gene IDS
 # Input parameters are the species string (eg. 'hsapiens') and a character vector of evidence codes
 # Defaults to non-computational evidence 
-getGOTermsWithEvidenceCodes <- function(species, evidence.codes = c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC")){
-  GOMap <- getGOMappings(species)
+get_GO_list_with_evidence_codes <- function(species, evidence.codes = c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC")){
+  GOMap <- get_GO_mappings(species)
   subGOMap <- GOMap[GOMap$go_linkage_type %in% evidence.codes,]
   GOTerms <- split(subGOMap$ensembl_gene_id, subGOMap$go_id)
   return(GOTerms)
@@ -253,8 +256,8 @@ getGOTermsWithEvidenceCodes <- function(species, evidence.codes = c("EXP","IDA",
 # Returns a list of GO terms with constituent ENESMBL gene IDS
 # Input parameters are the species string (eg. 'hsapiens'), a character vector of evidence codes and a character vector of ontology codes (eg. 'BP')
 # Defaults to non-computational evidence 
-getGOTermsFromOntologyWithEvidenceCodes <- function(species, evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies){
-  GOMap <- getGOMappings(species)
+get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies){
+  GOMap <- get_GO_mappings(species)
   subGOMap <- GOMap[(GOMap$go_linkage_type %in% evidence.codes)&(GOMap$namespace_1003 %in% ontologies),]
   GOTerms <- split(subGOMap$ensembl_gene_id, subGOMap$go_id)
   return(GOTerms)
@@ -265,7 +268,7 @@ getGOTermsFromOntologyWithEvidenceCodes <- function(species, evidence.codes=  c(
 # Each element contains a vector of gene IDs in the species that have more than 1 homolog in the other species
 # Input parameters are the two species strings (eg. 'hsapiens', 'drerio') 
 get_complex_genes <- function(species1, species2){
-  hm <- get.homology.matrix(species1, species2)
+  hm <- get_homology_matrix(species1, species2)
   hm.boolean <- hm > 0
   complex.cols <- which(colSums(hm.boolean) > 1)
   complex.rows <- which(rowSums(hm.boolean) > 1)
@@ -306,7 +309,7 @@ calculate_alternate_genesetlist_complexity <- function(dataset1, species2){
     print("ERROR: no complex homology between the same species")
     return(NULL)
   }
-  hm <- get.homology.matrix(species1, species2)
+  hm <- get_homology_matrix(species1, species2)
   data1 <- dataset1$data
   data1.complexity <- lapply(data1, function(X){
     return(sum(rowSums(hm[X[X%in%rownames(hm)],]))/sum(X%in%rownames(hm)))
@@ -318,7 +321,7 @@ calculate_alternate_genesetlist_complexity <- function(dataset1, species2){
 # Creates a homology matrix between two species by retrieving the homology table and then converting it into a sparse matrix
 # Returns a sparse matrix
 # Input parameters are the two species strings (eg. 'hsapiens', 'drerio') and a boolean of whether to return the sequence identity values or not 
-get.homology.matrix <- function(species1, species2, seq.identity = FALSE){
+get_homology_matrix <- function(species1, species2, seq.identity = FALSE){
   if(seq.identity == FALSE){
     if(!exists("homology.matrix.list", envir = .GlobalEnv)){
       assign("homology.matrix.list", list(), envir = .GlobalEnv)
@@ -334,7 +337,7 @@ get.homology.matrix <- function(species1, species2, seq.identity = FALSE){
     } else {
       # create a new homology matrix and return it
       ht <- get_homology_table(species1, species2)
-      hm <- generate.sparse.matrix(ht)
+      hm <- generate_sparse_matrix(ht)
       if(species1 %in% names(homology.matrix.list)){
         homology.matrix.list[[species1]][[species2]] <<- hm
       } else {
@@ -354,7 +357,7 @@ get.homology.matrix <- function(species1, species2, seq.identity = FALSE){
     } else {
       # create a new homology matrix and return it
       ht <- get_homology_table(species1, species2, 1)
-      hm <- generate.sparse.matrix(ht)
+      hm <- generate_sparse_matrix(ht)
       if(species1 %in% names(homology.seqid.matrix.list)){
         homology.seqid.matrix.list[[species1]][[species2]] <<- hm
       } else {
@@ -372,9 +375,9 @@ get.homology.matrix <- function(species1, species2, seq.identity = FALSE){
 # Input parameters are the species string (eg. 'hsapiens'), a list of named gene sets containing ENSEMBL IDs, the data type (currently only 'genesetlist' is supported), the name of the dataset (eg. 'HumanGeneOntology') and a character vector containing the ENSEMBL gene ID universe for this data set.
 # Returns a list with 5 elements describing the data set
 
-new.dataset.w.universe <- function(species, data, type, name, universe="empty"){
+new_XGSA_dataset <- function(species, data, type, name, universe="empty"){
   #check species
-  if(!species %in% supported_species){
+  if(!species %in% supported.species){
     print("ERROR: Species not supported")
     return(NULL)
   }
@@ -409,7 +412,7 @@ new.dataset.w.universe <- function(species, data, type, name, universe="empty"){
 
 ##########################
 # Checks that a data set is valid
-check.dataset <- function(dataset){
+check_XGSA_dataset <- function(dataset){
   spec.check <- is.character(dataset$species)
   data.check <- is.character(dataset$data) | is.list(dataset$data)
   type.check <- dataset$type %in% c("geneset","genesetlist")
@@ -425,9 +428,9 @@ check.dataset <- function(dataset){
 # Runs an XGSA test on two data sets
 # Input parameters are the two data sets, the test type (currently only "Fisher" is supported) and the minimum and maximum gene set sizes to consider.
 # Returns a complex structure with P values and gene overlaps.
-run.test.w.overlaps.w.universe <- function(dataset1, dataset2, test="fisher", min=5, max=500){
+run_XGSA_test <- function(dataset1, dataset2, test="fisher", min=5, max=500){
   # check data sets
-  if(!(check.dataset(dataset1) & check.dataset(dataset2))){
+  if(!(check_XGSA_dataset(dataset1) & check_XGSA_dataset(dataset2))){
     print("ERROR: Data is wrong") 
     return(NA)
   }
@@ -453,21 +456,20 @@ run.test.w.overlaps.w.universe <- function(dataset1, dataset2, test="fisher", mi
   if(species1 == species2){
     
     gene.list <- get_ENSEMBL_gene_list(species1)
-    hm <- generate.sparse.matrix(cbind(gene.list, gene.list))
+    hm <- generate_sparse_matrix(cbind(gene.list, gene.list))
     
     # DO a same species analysis
     
   } else {
     
-    hm <- get.homology.matrix(species1, species2)
+    hm <- get_homology_matrix(species1, species2)
     
   }
   if(type1 == "genesetlist" & type2 == "genesetlist"){
     if(test == "fisher"){  
       results <- lapply(data1, function(X){
         results2 <- lapply(data2, function(Y){
-#          return(fisherspairstatuniverse(X, Y, hm, min=min, max=max, rowuniverse=universe1, coluniverse=universe2))
-          res <- fisherspairstatuniverse(X, Y, hm, min=min, max=max, rowuniverse=universe1, coluniverse=universe2)
+          res <- paired_fishers_exact_tests(X, Y, hm, min=min, max=max, rowuniverse=universe1, coluniverse=universe2)
           if(!is.null(res)){
             return(res)
           }else{
@@ -475,7 +477,7 @@ run.test.w.overlaps.w.universe <- function(dataset1, dataset2, test="fisher", mi
           }})
         names(results2) <- names(data2)
         overlap2 <- lapply(data2, function(Y){
-          return(get.overlap.genes(X, Y, hm, min=min, max=max))
+          return(get_overlap_genes(X, Y, hm, min=min, max=max))
         })
         names(overlap2) <- names(data2)
         return(list(results2,overlap2))
