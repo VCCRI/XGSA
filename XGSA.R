@@ -20,6 +20,13 @@
 #
 # If this happens just try to re run the command that failed.
 #
+# XGSA depends on two libraries, Matrix and biomaRt
+# To install these execute the following commands:
+#
+# source("http://bioconductor.org/biocLite.R")
+# biocLite("biomaRt")
+# install.packages("Matrix")
+# 
 
 require(Matrix)
 require(biomaRt)
