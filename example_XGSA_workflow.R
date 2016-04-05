@@ -75,3 +75,19 @@ significant.GO.Term.names[,"name_1006"]
 #[6] "cardiac muscle cell differentiation" 
 #
 # Zebraish cardiac development terms from direct and experimental evidence are significantly enriched in mouse cardiac development genes, and vice-versa.
+#
+# Please now try your own analysis! Find some gene sets (make them a decent size, 10 - 500 is nice) from any of the supported species and compare them to each other or a reference set like the gene ontology.
+# To find supported species check:
+supported.species
+#[1] "oanatinus"         "cporcellus"        "gaculeatus"        "itridecemlineatus" "lafricana"         "choffmanni"       
+#[7] "csavignyi"         "fcatus"            "rnorvegicus"       "psinensis"         "cjacchus"          "ttruncatus"       
+#[13] "scerevisiae"       "celegans"          "csabaeus"          "oniloticus"        "amexicanus"        "trubripes"        
+#[19] "pmarinus"          "eeuropaeus"        "falbicollis"       "etelfairi"         "cintestinalis"     "ptroglodytes"     
+#[25] "nleucogenys"       "sscrofa"           "ocuniculus"        "dnovemcinctus"     "pcapensis"         "tguttata"         
+#[31] "mlucifugus"        "hsapiens"          "pformosa"          "tbelangeri"        "mfuro"             "ggallus"          
+#[37] "xtropicalis"       "ecaballus"         "pabelii"           "drerio"            "xmaculatus"        "tnigroviridis"    
+#[43] "lchalumnae"        "amelanoleuca"      "mmulatta"          "pvampyrus"         "panubis"           "mdomestica"       
+#[49] "acarolinensis"     "vpacos"            "tsyrichta"         "ogarnettii"        "dmelanogaster"     "mmurinus"         
+#[55] "loculatus"         "olatipes"          "oprinceps"         "ggorilla"          "dordii"            "oaries"           
+#[61] "mmusculus"         "mgallopavo"        "gmorhua"           "saraneus"          "aplatyrhynchos"    "sharrisii"        
+#[67] "meugenii"          "btaurus"           "cfamiliaris" 
