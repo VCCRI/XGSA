@@ -1,0 +1,9 @@
+XGSA README
+Djordje Djordjevic 2016
+d.djordjevic@victorchang.edu.au
+
+This repository contains the neccessary source code to execute XGSA as described in "XGSA: an unbiased statistical method for cross-species gene set analysis". The source code is implemented in R and exists in the file XGSA.R
+
+This repository also includes a fully working example demonstrating the workflow. This example is located in file XGSA_example_workflow.R
+
+Please contact Djordje with any comments or issues.
