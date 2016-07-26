@@ -47,9 +47,11 @@ require(Matrix)
 require(biomaRt)
 
 ##########################
-# When Ensembl move servers (rarely) these variable may need to be changed
+# When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version
 biomart.ID <- "ENSEMBL_MART_ENSEMBL"
 host.ID <-  "www.ensembl.org"
+#host.ID <-  "dec2015.archive.ensembl.org"
+
 
 find_supported_datasets <- function(default=TRUE){
   ensembl <- useMart(biomart.ID, dataset='hsapiens_gene_ensembl', host=host.ID)
@@ -69,8 +71,8 @@ supported.species <- find_supported_datasets()
 paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=5, max=500, rowuniverse, coluniverse){
     
     #only test those genes that actually exist in the matrix
-    row_genes <- as.character(row_genes[row_genes%in%rownames(homology_matrix)])
-    col_genes <- as.character(col_genes[col_genes%in%colnames(homology_matrix)])
+    row_genes <- unique(as.character(row_genes[row_genes%in%rownames(homology_matrix)]))
+    col_genes <- unique(as.character(col_genes[col_genes%in%colnames(homology_matrix)]))
 
     # figure out the correct universe size
     rowuniverse <- as.character(rowuniverse[rowuniverse%in%rownames(homology_matrix)])

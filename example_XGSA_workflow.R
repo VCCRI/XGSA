@@ -4,6 +4,18 @@
 # This file contains R code to run an example XGSA analysis. We will compare mouse cardiac genes with the Zebrafish Gene Ontology. 
 # Make sure you have installed the packages "biomaRt" and "Matrix", the commands to do so are below.
 #
+# solving issues with libcurl and XML dependencies:
+# sudo yum install curl-develsudo yum install curl-devel
+# sudo apt-get install libcurl4-openssl-dev libxml2-dev
+#
+# solving issues with https from unix "In file(filename, "r", encoding = encoding) : unsupported URL scheme"
+# library(RCurl)
+#    eval( expr = 
+#                 parse( text = getURL("https://raw.githubusercontent.com/VCCRI/XGSA/master/XGSA.R",
+#                                                             ssl.verifypeer=FALSE) ))
+#
+#
+#
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("biomaRt")
 # install.packages("Matrix")
