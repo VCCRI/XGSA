@@ -48,7 +48,7 @@ mouse.data <- new_XGSA_dataset(species = 'mmusculus', data = list(mouseCardiacGe
 # In this example we will compare to the zebrafish Gene Ontology using "direct" evidence only - this means the annotations are NOT transferred between species.
 # We will use another XGSA helper function to retrieve the latest Gene Ontology information from Ensembl "get_GO_list_from_ontologies_with_evidence_codes".
 # The gene universe we will use is all ofthe zebrafish biological process genes that we are testing. 
-zebrafish.GO <- get_GO_list_from_ontologies_with_evidence_codes(species = 'drerio', evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies = "biological_process")
+zebrafish.GO <- get_GO('drerio', ontologies = "biological_process")
 zebrafish.GO <- zebrafish.GO[lapply(zebrafish.GO, length) > 10 & lapply(zebrafish.GO, length) < 500]
 zebrafish.GO.data <- new_XGSA_dataset(species = "drerio", data = zebrafish.GO, type = 'genesetlist', name = "ZebrafishGO", universe = unique(unlist(zebrafish.GO)))
 
@@ -69,24 +69,29 @@ resulting.overlap.genes <- lapply(mouse.cardiac.vs.zebrafish.GO.results, functio
 # Now we perform Benjamini Hochberg multiple hypothesis testing correction to the pvalues.
 adjusted.pvals <- p.adjust(unlist(resulting.pvals), method = "BH")
 
-# We then extract the GO terms from the names of the significant results.
-significant.GO.Terms <- unlist(lapply(strsplit(names(which(adjusted.pvals < 0.05)),"\\."), function(X){return(X[[2]])}))
-
+# We need to make the names of our results interpretable for humans, so we extract the GO Term IDs
+names(adjusted.pvals) <- unlist(lapply(strsplit(names(adjusted.pvals) ,"\\."), function(X){return(X[[2]])}))
 # We can use another XGSA helper function to find out the GO term names.
 zebrafish.GO.names <- get_GO_names('drerio')
-significant.GO.Term.names <- zebrafish.GO.names[zebrafish.GO.names$go_id %in% significant.GO.Terms,]
+# And finally we get interpretable names
+names(adjusted.pvals) <- zebrafish.GO.names[match( names(adjusted.pvals), zebrafish.GO.names$go_id),"name_1006"]
 
-# If we see which zebrafish GO terms are enriched we get:
-significant.GO.Term.names[,"name_1006"]
+significant.GO.Terms <- adjusted.pvals[which(adjusted.pvals < 0.05)]
+
+# Now let's look at the 10 most significant GO term results
+head(sort(significant.GO.Terms),10)
+#cell fate commitment                             mesoderm development 
+#8.363504e-09                                     2.305281e-07 
+#cell fate specification                 embryonic heart tube development 
+#2.734734e-07                                     9.498289e-07 
+#cardiocyte differentiation                         diencephalon development 
+#4.236265e-06                                     4.506317e-06 
+#heart morphogenesis                             endoderm development 
+#9.151835e-06                                     3.238483e-05 
+#heart development regulation of endodermal cell fate specification 
+#3.238483e-05                                     3.238483e-05 
 #
-#[1] "positive regulation of transcription from RNA polymerase II promoter"
-#[2] "heart looping"                                                       
-#[3] "embryonic heart tube development"                                    
-#[4] "mesoderm formation"                                                  
-#[5] "anterior/posterior pattern specification"                            
-#[6] "cardiac muscle cell differentiation" 
-#
-# Zebraish cardiac development terms from direct and experimental evidence are significantly enriched in mouse cardiac development genes, and vice-versa.
+# Zebraish cardiac development terms are significantly enriched in mouse cardiac development genes, and vice-versa.
 #
 # Please now try your own analysis! Find some gene sets (make them a decent size, 10 - 500 is nice) from any of the supported species and compare them to each other or a reference set like the gene ontology.
 # To find supported species check:
