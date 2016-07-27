@@ -1,4 +1,3 @@
-# XGSA.R
 # Copyright Victor Chang Cardiac Research Institute 2016
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -34,17 +33,23 @@
 #
 # If this happens just try to re run the command that failed.
 #
-# XGSA depends on two libraries, Matrix and biomaRt
+# XGSA depends on two libraries, slam and biomaRt
 # To install these execute the following commands:
 #
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("biomaRt")
-# install.packages("Matrix")
+# install.packages("slam")
 # 
+# Processing the Gene Ontology also depends on the packages AnnotationDBI and igraph
+# install.packages("AnnotationDBI")
+# install.packages("igraph")
+#
 ##########################
 
-require(Matrix)
+require(slam)
 require(biomaRt)
+require(AnnotationDbi)
+require(igraph)
 
 ##########################
 # When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version
@@ -69,35 +74,36 @@ supported.species <- find_supported_datasets()
 # It returns a single numeric p-value
 # Input parameters are the Ensembl gene IDs in the two species, corresponding to the rows and columns of the homology matrix, the homology matrix itself, maximum and minimum gene set sizes to be considered, and the two gene universes to consider.
 paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=5, max=500, rowuniverse, coluniverse){
-    
-    #only test those genes that actually exist in the matrix
-    row_genes <- unique(as.character(row_genes[row_genes%in%rownames(homology_matrix)]))
-    col_genes <- unique(as.character(col_genes[col_genes%in%colnames(homology_matrix)]))
-
-    # figure out the correct universe size
-    rowuniverse <- as.character(rowuniverse[rowuniverse%in%rownames(homology_matrix)])
-    coluniverse <- as.character(coluniverse[coluniverse%in%colnames(homology_matrix)])
-    
-    rowuniverse <- intersect(rowuniverse, rownames(homology_matrix)[which(rowSums(homology_matrix[,coluniverse, drop=FALSE])>0)])
-    coluniverse <- intersect(coluniverse, colnames(homology_matrix)[which(colSums(homology_matrix[rowuniverse,, drop=FALSE])>0)])
-    
-    
-    #check size of gene sets
-    if((length(row_genes) < min) | (length(col_genes) < min) | (length(row_genes) > max) | (length(col_genes) > max)) { return(NULL) }
-    
-    #share orthology information by predicting gene set genes
-    predicted_col_genes <- colnames(homology_matrix)[which(colSums(homology_matrix[row_genes,, drop=FALSE])>0)]
-    predicted_row_genes <- rownames(homology_matrix)[which(rowSums(homology_matrix[,col_genes, drop=FALSE])>0)]
-    
-    rowhits <- intersect(row_genes, predicted_row_genes)
-    colhits <- intersect(col_genes, predicted_col_genes)
-    
-    row.p <- fisher.test(matrix(c(length(rowhits),length(predicted_row_genes)-length(rowhits),length(row_genes)-length(rowhits),length(rowuniverse)-length(unique(union(row_genes, predicted_row_genes)))),2,2), alternative='greater')$p.value 
-    col.p <- fisher.test(matrix(c(length(colhits),length(predicted_col_genes)-length(colhits),length(col_genes)-length(colhits),length(coluniverse)-length(unique(union(col_genes, predicted_col_genes)))),2,2), alternative='greater')$p.value 
-    
-    
-    return(max(row.p, col.p))
+  
+  #only test those genes that actually exist in the matrix
+  row_genes <- unique(as.character(row_genes[row_genes%in%rownames(homology_matrix)]))
+  col_genes <- unique(as.character(col_genes[col_genes%in%colnames(homology_matrix)]))
+  
+  # figure out the correct universe size
+  rowuniverse <- as.character(rowuniverse[rowuniverse%in%rownames(homology_matrix)])
+  coluniverse <- as.character(coluniverse[coluniverse%in%colnames(homology_matrix)])
+  
+  rowuniverse <- intersect(rowuniverse, rownames(homology_matrix)[which(row_sums(homology_matrix[,coluniverse, drop=FALSE])>0)])
+  coluniverse <- intersect(coluniverse, colnames(homology_matrix)[which(col_sums(homology_matrix[rowuniverse,, drop=FALSE])>0)])
+  
+  
+  #check size of gene sets
+  if((length(row_genes) < min) | (length(col_genes) < min) | (length(row_genes) > max) | (length(col_genes) > max)) { return(NULL) }
+  
+  #share orthology information by predicting gene set genes
+  predicted_col_genes <- colnames(homology_matrix)[which(col_sums(homology_matrix[row_genes,, drop=FALSE])>0)]
+  predicted_row_genes <- rownames(homology_matrix)[which(row_sums(homology_matrix[,col_genes, drop=FALSE])>0)]
+  
+  rowhits <- intersect(row_genes, predicted_row_genes)
+  colhits <- intersect(col_genes, predicted_col_genes)
+  
+  row.p <- fisher.test(matrix(c(length(rowhits),length(predicted_row_genes)-length(rowhits),length(row_genes)-length(rowhits),length(rowuniverse)-length(unique(union(row_genes, predicted_row_genes)))),2,2), alternative='greater')$p.value 
+  col.p <- fisher.test(matrix(c(length(colhits),length(predicted_col_genes)-length(colhits),length(col_genes)-length(colhits),length(coluniverse)-length(unique(union(col_genes, predicted_col_genes)))),2,2), alternative='greater')$p.value 
+  
+  
+  return(max(row.p, col.p))
 }
+
 
 
 ##########################
@@ -107,15 +113,15 @@ paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=
 get_overlap_genes<-function(row_genes, col_genes, homology_matrix, min=5, max=500){
   
   #only test those genes that actually exist in the matrix
-  row_genes <- as.character(row_genes[row_genes%in%rownames(homology_matrix)])
-  col_genes <- as.character(col_genes[col_genes%in%colnames(homology_matrix)])
+  row_genes <- unique(as.character(row_genes[row_genes%in%rownames(homology_matrix)]))
+  col_genes <- unique(as.character(col_genes[col_genes%in%colnames(homology_matrix)]))
   
   #check size of gene sets
   #if((length(row_genes) < min) | (length(col_genes) < min) | (length(row_genes) > max) | (length(col_genes) > max)) { return(NULL) }
   
   #share orthology information by predicting gene set genes
-  predicted_col_genes <- colnames(homology_matrix)[which(colSums(homology_matrix[row_genes,, drop=FALSE])>0)]
-  predicted_row_genes <- rownames(homology_matrix)[which(rowSums(homology_matrix[,col_genes, drop=FALSE])>0)]
+  predicted_col_genes <- colnames(homology_matrix)[which(col_sums(homology_matrix[row_genes,, drop=FALSE])>0)]
+  predicted_row_genes <- rownames(homology_matrix)[which(row_sums(homology_matrix[,col_genes, drop=FALSE])>0)]
   
   rowhits <- intersect(row_genes, predicted_row_genes)
   colhits <- intersect(col_genes, predicted_col_genes)
@@ -125,18 +131,22 @@ get_overlap_genes<-function(row_genes, col_genes, homology_matrix, min=5, max=50
   return(overlap)
 }
 
-#loading functions
+
 
 ##########################
-#this function generates a sparse matrix from a table with two or three columns: ID ID Value(optional)
+# This function generates a sparse matrix from a table with two or three columns: ID ID Value(optional)
+# It uses the simple_triplet_matrix structure from the package 'slam'
 generate_sparse_matrix <- function(homology_table){
+  require(slam)
   # Compare only genes with homology mapping
   homology_table <- unique(homology_table)[!unique(homology_table)[,2]=="",]
   
   if(ncol(homology_table)==3){
-    hms <- sparseMatrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])), x = homology_table[,3])
+    #hms <- sparseMatrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])), x = homology_table[,3])
+    hms <- simple_triplet_matrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])), v = homology_table[,3])
   } else if(ncol(homology_table)==2){
-    hms <- sparseMatrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])))
+    hms <- simple_triplet_matrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])), v = rep(1,nrow(homology_table)))
+    #hms <- sparseMatrix(i = match(homology_table[,1], unique(homology_table[,1]) ), j = match(homology_table[,2], unique(homology_table[,2])))
   } else {
     print("ERROR: incorrect number of columns in homology table ")
     return(NULL)
@@ -254,38 +264,63 @@ get_GO_mappings <- function(species){
 } 
 
 ##########################
-# Retrieves GO mappings and converts the result into a list
-# Returns a list of GO terms with constituent ENESMBL gene IDS
-# Input parameter is the species string (eg. 'hsapiens')
-get_GO_list <- function(species){
-  GOMap <- get_GO_mappings(species)
-  GOTerms <- split(GOMap$ensembl_gene_id, GOMap$go_id)
-  return(GOTerms)
-}
-
-##########################
-# Retrieves GO mappings with only the supplied evidence codes and converts the result into a list
-# Returns a list of GO terms with constituent ENESMBL gene IDS
-# Input parameters are the species string (eg. 'hsapiens') and a character vector of evidence codes
-# Defaults to non-computational evidence 
-get_GO_list_with_evidence_codes <- function(species, evidence.codes = c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC")){
-  GOMap <- get_GO_mappings(species)
-  subGOMap <- GOMap[GOMap$go_linkage_type %in% evidence.codes,]
-  GOTerms <- split(subGOMap$ensembl_gene_id, subGOMap$go_id)
-  return(GOTerms)
-}
-
-##########################
 # Retrieves GO mappings with only the supplied evidence codes and from only the supplied ontologies and converts the result into a list
 # Returns a list of GO terms with constituent ENESMBL gene IDS
 # Input parameters are the species string (eg. 'hsapiens'), a character vector of evidence codes and a character vector of ontology codes (eg. 'BP')
 # Defaults to non-computational evidence 
-get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies){
+get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies = c("biological_process", "molecular_function", "cellular_component")){
   GOMap <- get_GO_mappings(species)
   subGOMap <- GOMap[(GOMap$go_linkage_type %in% evidence.codes)&(GOMap$namespace_1003 %in% ontologies),]
   GOTerms <- split(subGOMap$ensembl_gene_id, subGOMap$go_id)
   return(GOTerms)
 }
+
+
+##########################
+# Collapses all child GO term annotations to their parent terms, resulting in the full redundant GO
+# Returns a list of GO terms with constituent gene IDS
+# Input parameter is the list of GO term annotations produced by "get_GO_list_from_ontologies_with_evidence_codes" for example
+collapseGO <- function(GO_Terms){
+  
+  require(igraph)
+  require(AnnotationDbi)
+  
+  bp <- AnnotationDbi::makeGOGraph(ont = "bp")
+  mf <- AnnotationDbi::makeGOGraph(ont = "mf")
+  cc <- AnnotationDbi::makeGOGraph(ont = "cc")
+  
+  go.bp <- igraph.from.graphNEL(bp)
+  go.mf <- igraph.from.graphNEL(mf)
+  go.cc <- igraph.from.graphNEL(cc)
+  
+  go.g <- igraph::union(go.bp, go.mf, go.cc)
+  
+  new_GO_Terms <- lapply(names(GO_Terms), function(G){
+    if(!G%in%names(V(go.g))){
+      return(unique(na.omit(unlist(GO_Terms[c(G)]))))  
+    }
+    child_terms <- names(subcomponent(go.g, G, mode = "in"))
+    return(unique(na.omit(unlist(GO_Terms[c(child_terms,G)]))))
+  })
+  
+  names(new_GO_Terms) <- names(GO_Terms)
+  return(new_GO_Terms)
+}
+
+
+##########################
+# Retrieves GO mappings with only the supplied evidence codes and from only the supplied ontologies and converts the result into a list
+# Collapses all child term annotations to their parent terms, resulting in the full redundant GO
+# Returns a list of GO terms with constituent ENESMBL gene IDS
+# Input parameters are the species string (eg. 'hsapiens'), a character vector of evidence codes and a character vector of ontology codes (eg. 'BP')
+# Defaults to non-computational evidence 
+get_GO <- function(species, evidence.codes=  c("EXP","IDA","IPI","IMP","IGI","IEP", "TAS", "IC"), ontologies = c("biological_process", "molecular_function", "cellular_component")){
+  go <- get_GO_list_from_ontologies_with_evidence_codes(species, evidence.codes, ontologies)
+  print("retrieved GO")
+  c.go <- collapseGO(go)
+  return(c.go)
+}
+
 
 ##########################
 # Returns a list with two elements (one for each species). 
@@ -294,8 +329,8 @@ get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.co
 get_complex_genes <- function(species1, species2){
   hm <- get_homology_matrix(species1, species2)
   hm.boolean <- hm > 0
-  complex.cols <- which(colSums(hm.boolean) > 1)
-  complex.rows <- which(rowSums(hm.boolean) > 1)
+  complex.cols <- which(col_sums(hm.boolean) > 1)
+  complex.rows <- which(row_sums(hm.boolean) > 1)
   species1.complex.genes <- rownames(hm.boolean)[complex.rows]
   species2.complex.genes <- colnames(hm.boolean)[complex.cols]
   complex.genes <- list(species1.complex.genes, species2.complex.genes)  
@@ -336,7 +371,7 @@ calculate_alternate_genesetlist_complexity <- function(dataset1, species2){
   hm <- get_homology_matrix(species1, species2)
   data1 <- dataset1$data
   data1.complexity <- lapply(data1, function(X){
-    return(sum(rowSums(hm[X[X%in%rownames(hm)],]))/sum(X%in%rownames(hm)))
+    return(sum(row_sums(hm[X[X%in%rownames(hm)],]))/sum(X%in%rownames(hm)))
   })
   return(data1.complexity)
 }
@@ -359,9 +394,19 @@ get_homology_matrix <- function(species1, species2, seq.identity = FALSE){
       # inverse homology matrix already generated and stored
       return(t(homology.matrix.list[[species2]][[species1]]))
     } else {
-      # create a new homology matrix and return it
-      ht <- get_homology_table(species1, species2)
-      hm <- generate_sparse_matrix(ht)
+      if(species1 == species2){
+        
+        gene.list <- get_ENSEMBL_gene_list(species1)
+        hm <- generate_sparse_matrix(cbind(gene.list, gene.list))
+        
+        #DO a same species analysis
+        
+      } else {
+        
+        # create a new homology matrix and return it
+        ht <- get_homology_table(species1, species2)
+        hm <- generate_sparse_matrix(ht)
+      }
       if(species1 %in% names(homology.matrix.list)){
         homology.matrix.list[[species1]][[species2]] <<- hm
       } else {
@@ -379,9 +424,14 @@ get_homology_matrix <- function(species1, species2, seq.identity = FALSE){
       # homology matrix already genearted and stored
       return(homology.seqid.matrix.list[[species1]][[species2]])
     } else {
-      # create a new homology matrix and return it
-      ht <- get_homology_table(species1, species2, 1)
-      hm <- generate_sparse_matrix(ht)
+      if(species1 == species2){
+        gene.list <- get_ENSEMBL_gene_list(species1)
+        hm <- generate_sparse_matrix(cbind(gene.list, gene.list))
+      } else {
+        # create a new homology matrix and return it
+        ht <- get_homology_table(species1, species2, 1)
+        hm <- generate_sparse_matrix(ht)
+      }
       if(species1 %in% names(homology.seqid.matrix.list)){
         homology.seqid.matrix.list[[species1]][[species2]] <<- hm
       } else {
@@ -394,12 +444,13 @@ get_homology_matrix <- function(species1, species2, seq.identity = FALSE){
 }
 
 
+
 ##########################
 # Creates an XGSA data set object
 # Input parameters are the species string (eg. 'hsapiens'), a list of named gene sets containing ENSEMBL IDs, the data type (currently only 'genesetlist' is supported), the name of the dataset (eg. 'HumanGeneOntology') and a character vector containing the ENSEMBL gene ID universe for this data set.
 # Returns a list with 5 elements describing the data set
 
-new_XGSA_dataset <- function(species, data, type, name, universe="empty"){
+new_XGSA_dataset <- function(species, data, type = "genesetlist", name, universe="empty"){
   #check species
   if(!species %in% supported.species){
     print("ERROR: Species not supported")
@@ -474,21 +525,8 @@ run_XGSA_test <- function(dataset1, dataset2, test="fisher", min=5, max=500){
   universe1 <- dataset1$universe
   universe2 <- dataset2$universe
   
+  hm <- get_homology_matrix(species1, species2)
   
-  # check if matrix exists
-  
-  if(species1 == species2){
-    
-    gene.list <- get_ENSEMBL_gene_list(species1)
-    hm <- generate_sparse_matrix(cbind(gene.list, gene.list))
-    
-    # DO a same species analysis
-    
-  } else {
-    
-    hm <- get_homology_matrix(species1, species2)
-    
-  }
   if(type1 == "genesetlist" & type2 == "genesetlist"){
     if(test == "fisher"){  
       results <- lapply(data1, function(X){
@@ -504,7 +542,7 @@ run_XGSA_test <- function(dataset1, dataset2, test="fisher", min=5, max=500){
           return(get_overlap_genes(X, Y, hm, min=min, max=max))
         })
         names(overlap2) <- names(data2)
-        return(list(results2,overlap2))
+        return(list(pvals = results2, genes = overlap2))
       })
       names(results) <- names(data1)
       return(results)
