@@ -80,8 +80,8 @@ paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=
   col_genes <- unique(as.character(col_genes[col_genes%in%colnames(homology_matrix)]))
   
   # figure out the correct universe size
-  rowuniverse <- as.character(rowuniverse[rowuniverse%in%rownames(homology_matrix)])
-  coluniverse <- as.character(coluniverse[coluniverse%in%colnames(homology_matrix)])
+  rowuniverse <- unique(as.character(rowuniverse[rowuniverse%in%rownames(homology_matrix)]))
+  coluniverse <- unique(as.character(coluniverse[coluniverse%in%colnames(homology_matrix)]))
   
   rowuniverse <- intersect(rowuniverse, rownames(homology_matrix)[which(row_sums(homology_matrix[,coluniverse, drop=FALSE])>0)])
   coluniverse <- intersect(coluniverse, colnames(homology_matrix)[which(col_sums(homology_matrix[rowuniverse,, drop=FALSE])>0)])
