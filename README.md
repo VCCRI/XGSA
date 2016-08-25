@@ -6,14 +6,26 @@ XGSA: a statistical method for cross-species gene set analysis
 Introduction
 ------------
 
-XGSA is an R package that facilitates cross(X)-species Gene Set Analysis as described in - paper reference here - XGSA uses Ensembl through te biomaRt portal to automatically deal with homology mapping between species. Because of that we use Ensembl IDs to represent our genes.
+XGSA is an R package that facilitates cross(X)-species Gene Set Analysis as described in - XGSA: a statistical method for cross species gene set analysis, 2016, Djordjevic D, Ho JWK, Kusumi K, Bioinformatics i1 - i9, doi: 10.1093/bioinformatics/btw428
 
-XGSA was written by Djordje DJordjevic - <d.djordjevic@victorchang.edu.au>
+XGSA accesses Ensembl through the Biomart portal to automatically deal with homology mapping between species. Because of that we use Ensembl IDs to represent our genes.
+
+XGSA was written by Djordje Djordjevic - <d.djordjevic@victorchang.edu.au>
 
 Installation
 ------------
 
 Open an R session.
+
+XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, igraph Make sure these are available to you.
+
+``` r
+source("http://bioconductor.org/biocLite.R")
+biocLite("biomaRt")
+biocLite("AnnotationDbi")
+
+install.packages("slam", "igraph")
+```
 
 Install XGSA using:
 
@@ -21,26 +33,12 @@ Install XGSA using:
 source("https://raw.githubusercontent.com/VCCRI/XGSA/master/XGSA.R")
 ```
 
-XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, igraph Make sure these are available to you.
-
-``` r
-source("http://bioconductor.org/biocLite.R")
-biocLite("biomaRt")
-
-install.packages("slam", "AnnotationDbi", "igraph")
-```
-
 Alternatively --- this install procedure is not yet implemented
 
-Make sure you have devtools installed
+Make sure you have devtools installed, then install XGSA from github:
 
 ``` r
 install.packages('devtools')
-```
-
-Then install XGSA from github using:
-
-``` r
 devtools::install_github('VCCRI/XGSA')
 ```
 
@@ -86,7 +84,7 @@ mouse.data <- new_XGSA_dataset(species = 'mmusculus', data = list(mouseCardiacGe
 
 ### Load reference dataset (i.e. Gene Ontology)
 
-In this example we will compare to the zebrafish Gene Ontology using "direct" evidence only - this means the annotations are NOT transferred between species. We will use another XGSA helper function to retrieve the latest Gene Ontology information from Ensembl "get\_GO\_list\_from\_ontologies\_with\_evidence\_codes". The gene universe we will use is all ofthe zebrafish biological process genes that we are testing.
+In this example we will compare to the zebrafish Gene Ontology using "direct" evidence only - this means the annotations are NOT transferred between species. We will use another XGSA helper function "get\_GO" to retrieve the latest Gene Ontology information from Ensembl. The gene universe we will use is all of the zebrafish biological process genes that we are testing.
 
 ``` r
 # In this example we will compare to the zebrafish Gene Ontology using "direct" evidence only - this means the annotations are NOT transferred between species.
@@ -109,16 +107,16 @@ mouse.cardiac.vs.zebrafish.GO.results <- run_XGSA_test(mouse.data, zebrafish.GO.
 
 ### Examining the results
 
-We need to separate the pvalues and the overlapping gene IDs, because XGSA returns both. The p.values are stored in the first element of each result, and the overlapping genes are stored in the second element.
+We need to separate the pvalues and the overlapping gene IDs, because XGSA returns both. The p-values are stored in the first element of each result, and the overlapping genes are stored in the second element.
 
 ``` r
 # We need to separate the pvalues and the overlapping gene IDs, because XGSA returns both.
 # The p.values are stored in the first element of each result, and the overlapping genes are stored in the second element.
-resulting.pvals <- lapply(mouse.cardiac.vs.zebrafish.GO.results, function(X){ X[[1]] })
-resulting.overlap.genes <- lapply(mouse.cardiac.vs.zebrafish.GO.results, function(X){ X[[2]] })
+resulting.pvals <- lapply(mouse.cardiac.vs.zebrafish.GO.results, function(X){ X[["pvals"]] })
+resulting.overlap.genes <- lapply(mouse.cardiac.vs.zebrafish.GO.results, function(X){ X[["genes"]] })
 ```
 
-Now we perform Benjamini Hochberg multiple hypothesis testing correction to the pvalues.
+Now we perform Benjamini-Hochberg multiple hypothesis testing correction to the p-values.
 
 ``` r
 # Now we perform Benjamini Hochberg multiple hypothesis testing correction to the pvalues.
@@ -166,7 +164,7 @@ par(mar=c(10,5,4,2))
 barplot(-log10(head(sort(significant.GO.Terms),10)), ylab = "- log 10 p-value", las=2)
 ```
 
-![](README-unnamed-chunk-15-1.png)
+![](README-unnamed-chunk-14-1.png)
 
 Zebraish cardiac development terms are significantly enriched in mouse cardiac development genes, and vice-versa.
 
