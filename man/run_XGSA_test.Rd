@@ -71,7 +71,7 @@ resulting.overlap.genes <- lapply(mouse.cardiac.vs.zebrafish.GO.results, functio
 adjusted.pvals <- p.adjust(unlist(resulting.pvals), method = "BH")
 
 # We need to make the names of our results interpretable for humans, so we extract the GO Term IDs
-names(adjusted.pvals) <- unlist(lapply(strsplit(names(adjusted.pvals) ,"\\."), function(X){return(X[[2]])}))
+names(adjusted.pvals) <- unlist(lapply(strsplit(names(adjusted.pvals) ,"\\\\."), function(X){return(X[[2]])}))
 # We can use another XGSA helper function to find out the GO term names.
 zebrafish.GO.names <- get_GO_names('drerio')
 # And finally we get interpretable names
