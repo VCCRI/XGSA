@@ -29,12 +29,6 @@ install.packages("slam", "igraph")
 
 Install XGSA using:
 
-``` r
-source("https://raw.githubusercontent.com/VCCRI/XGSA/master/XGSA.R")
-```
-
-Alternatively --- this install procedure is not yet implemented
-
 Make sure you have devtools installed, then install XGSA from github:
 
 ``` r
@@ -68,8 +62,6 @@ XGSA harnesses the Ensembl homology pipeline, and so we need to convert all of o
 # We will convert the mouse gene symbols to Ensembl IDs using the XGSA helper function "get_ENSEMBL_symbol_map".
 mouse.ensembl.symbol.map <- get_ENSEMBL_symbol_map(species = 'mmusculus')
 #> Loading required package: biomaRt
-#> [1] "ENSEMBL_MART_ENSEMBL"
-#> [1] "www.ensembl.org"
 mouse.cardiac.ensembl.symbols <- mouse.ensembl.symbol.map$ensembl_gene_id[mouse.ensembl.symbol.map$external_gene_name %in% mouse.cardiac.genes]
 ```
 
@@ -164,7 +156,7 @@ par(mar=c(10,5,4,2))
 barplot(-log10(head(sort(significant.GO.Terms),10)), ylab = "- log 10 p-value", las=2)
 ```
 
-![](README-unnamed-chunk-14-1.png)
+![](README-unnamed-chunk-13-1.png)
 
 Zebraish cardiac development terms are significantly enriched in mouse cardiac development genes, and vice-versa.
 
