@@ -24,7 +24,7 @@
 
 
   biomartID <<- "ENSEMBL_MART_ENSEMBL"
-  hostID <<-  "www.asia.ensembl.org"
+  hostID <<-  "asia.ensembl.org"
   supportedSpecies <<- find_supported_datasets()
 
   invisible()

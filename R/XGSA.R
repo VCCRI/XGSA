@@ -76,7 +76,7 @@ require(igraph)
 biomartID <- "ENSEMBL_MART_ENSEMBL"
 
 #hostID <-  "www.ensembl.org"
-hostID <-  "www.asia.ensembl.org"
+hostID <-  "asia.ensembl.org"
 #hostID <-  "dec2015.archive.ensembl.org"
 
 #' @title find_supported_datasets
