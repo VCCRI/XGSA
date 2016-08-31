@@ -615,7 +615,7 @@ get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.co
 #'
 #' @import igraph
 #' @import GO.db
-#' @importFrom AnnotationDbi makeGOGraph
+#' @import AnnotationDbi
 #'
 #' @export
 #'
