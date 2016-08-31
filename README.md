@@ -6,9 +6,9 @@ XGSA: a statistical method for cross-species gene set analysis
 Introduction
 ------------
 
-XGSA is an R package that facilitates cross(X)-species Gene Set Analysis as described in - XGSA: a statistical method for cross species gene set analysis, 2016, Djordjevic D, Ho JWK, Kusumi K, Bioinformatics i1 - i9, doi: 10.1093/bioinformatics/btw428
+XGSA is an R package that facilitates cross(X)-species Gene Set Analysis as described in - XGSA: a statistical method for cross species gene set analysis, 2016, Djordjevic D, Ho JWK, Kusumi K, Bioinformatics, DOI: 10.1093/bioinformatics/btw428
 
-XGSA accesses Ensembl through the Biomart portal to automatically deal with homology mapping between species. Because of that we use Ensembl IDs to represent our genes.
+XGSA accesses Ensembl through the Biomart portal to automatically deal with homology mapping between species. Because of this we use Ensembl IDs to represent our genes. Ensembl / Biomart occassionally goes down. This can result in strange errors such as "Extra content at the end of the document". You can check the status of the Ensembl web services here <https://wtsi-status.blogspot.com.au/> and here <http://www.ensembl.info/blog/category/web/web-status/> . Currently the only solution is to wait for Ensembl to come fully back online and try again.
 
 XGSA was written by Djordje Djordjevic - <d.djordjevic@victorchang.edu.au>
 
@@ -17,12 +17,14 @@ Installation
 
 Open an R session.
 
-XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, igraph Make sure these are available to you.
+XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, GO.db and igraph Make sure these are available to you.
 
 ``` r
 source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
 biocLite("AnnotationDbi")
+biocLite("GO.db")
+
 
 install.packages("slam", "igraph")
 ```
