@@ -17,16 +17,17 @@ Installation
 
 Open an R session.
 
-XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, GO.db and igraph Make sure these are available to you.
+XGSA depends on 2 packages, slam and biomaRt. Constructing the Gene Ontology relies on another 4 packages AnnotationDbi, GO.db, graph and igraph. Make sure these are available to you.
 
 ``` r
 source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
 biocLite("AnnotationDbi")
 biocLite("GO.db")
+biocLite("graph")
 
 
-install.packages("slam", "igraph", "graph")
+install.packages("slam", "igraph")
 ```
 
 Install XGSA using:

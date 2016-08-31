@@ -32,9 +32,10 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
 biocLite("AnnotationDbi")
 biocLite("GO.db")
+biocLite("graph")
 
 
-install.packages("slam", "igraph", "graph")
+install.packages("slam", "igraph")
 ```
 
 Install XGSA using:
