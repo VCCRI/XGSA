@@ -24,7 +24,8 @@ XGSA was written by Djordje Djordjevic - d.djordjevic@victorchang.edu.au
 ## Installation
 Open an R session.
 
-XGSA depends on 4 packages, slam, biomaRt, AnnotationDbi, GO.db and igraph
+XGSA depends on 2 packages, slam and biomaRt.
+Constructing the Gene Ontology relies on another 4 packages AnnotationDbi, GO.db, graph and igraph.
 Make sure these are available to you.
 ```{r, eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
@@ -33,7 +34,7 @@ biocLite("AnnotationDbi")
 biocLite("GO.db")
 
 
-install.packages("slam", "igraph")
+install.packages("slam", "igraph", "graph")
 ```
 
 Install XGSA using:

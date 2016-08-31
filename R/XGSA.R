@@ -63,7 +63,7 @@ require(biomaRt)
 require(AnnotationDbi)
 require(igraph)
 require(GO.db)
-
+require(graph)
 
 ##########################
 # When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version
@@ -614,6 +614,7 @@ get_GO_list_from_ontologies_with_evidence_codes <- function(species, evidence.co
 #' @param GO_Terms A non-redundant list of GO term annotations produced by "get_GO_list_from_ontologies_with_evidence_codes" for example.
 #'
 #' @import igraph
+#' @import graph
 #' @import GO.db
 #' @import AnnotationDbi
 #'
