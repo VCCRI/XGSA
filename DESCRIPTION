@@ -1,11 +1,10 @@
 Package: xgsa
 Type: Package
-Title: bla
+Title: XGSA: A statistical method for cross-species gene set analysis
 Version: 0.1.0
-Author: Peijie Lin, Michael Troup
-Maintainer: Peijie Lin <P.Lin@victorchang.edu.au>
-Description: Fast and accurate clustering through imputation and dimensionality
-    reduction for Single Cell RNA-seq data
+Author: Djordje Djordjevic
+Maintainer: Djordje DJordjevic <d.djordjevic@victorchang.edu.au>
+Description: Gene set analysis is a powerful tool for determining whether an experimentally derived set of genes is statistically significantly enriched for genes in other pre-defined gene sets, such as known pathways, gene ontology terms, or other experimentally derived gene sets. Current gene set analysis methods do not facilitate comparing gene sets across different organisms as they do not explicitly deal with homology mapping between species. We have shown that not accounting for the complex homology structure when comparing gene sets in two species can lead to false positive discoveries, especially when comparing gene sets that have complex gene homology relationships. To overcome this bias, we propose a straightforward statistical approach, called XGSA, that explicitly takes the cross-species homology mapping into consideration when doing gene set analysis. Simulation experiments confirm that XGSA can avoid false positive discoveries, while maintaining good statistical power compared to other ad hoc approaches for cross-species gene set analysis. 
 License: GPL (>=2)
 LazyData: TRUE
 Depends: R (>= 3.1.0)
