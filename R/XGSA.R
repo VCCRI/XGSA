@@ -163,6 +163,8 @@ paired_fishers_exact_tests<-function(row_genes, col_genes, homology_matrix, min=
   rowuniverse <- intersect(rowuniverse, rownames(homology_matrix)[which(row_sums(homology_matrix[,coluniverse, drop=FALSE])>0)])
   coluniverse <- intersect(coluniverse, colnames(homology_matrix)[which(col_sums(homology_matrix[rowuniverse,, drop=FALSE])>0)])
 
+  row_genes <- intersect(row_genes, rowuniverse)
+  col_genes <- intersect(col_genes, coluniverse)
 
   #check size of gene sets
   if((length(row_genes) < min) | (length(col_genes) < min) | (length(row_genes) > max) | (length(col_genes) > max)) { return(NULL) }
