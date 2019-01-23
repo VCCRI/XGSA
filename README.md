@@ -27,7 +27,7 @@ biocLite("GO.db")
 biocLite("graph")
 
 
-install.packages("slam", "igraph")
+install.packages(c("slam", "igraph"))
 ```
 
 Install XGSA using:
