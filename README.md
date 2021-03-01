@@ -10,7 +10,7 @@ XGSA is an R package that facilitates cross(X)-species Gene Set Analysis as desc
 
 XGSA accesses Ensembl through the Biomart portal to automatically deal with homology mapping between species. Because of this we use Ensembl IDs to represent our genes. Ensembl / Biomart occassionally goes down. This can result in strange errors such as "Extra content at the end of the document". You can check the status of the Ensembl web services here <https://wtsi-status.blogspot.com.au/> and here <http://www.ensembl.info/blog/category/web/web-status/> . Currently the only solution is to wait for Ensembl to come fully back online and try again.
 
-XGSA was written by Djordje Djordjevic - <d.djordjevic@victorchang.edu.au>
+XGSA was written by Djordje Djordjevic - <djordje.evic@gmail.com>
 
 Installation
 ------------
@@ -178,3 +178,15 @@ barplot(-log10(head(sort(significant.GO.Terms),10)), ylab = "- log 10 p-value", 
 Zebrafish cardiac development terms are significantly enriched in mouse cardiac development genes, and vice-versa.
 
 Please now try your own analysis!
+
+
+Trouble Shooting
+------------
+
+When Ensembl move servers (rarely) or a particular server is down (less rare) you can use the following command to change servers once the xgsa package has been loaded:
+
+assignInNamespace(x = "hostID", ns = "xgsa", value = "asia.ensembl.org")
+
+Or for a stable archive version:
+
+assignInNamespace(x = "hostID", ns = "xgsa", value = "aug2020.archive.ensembl.org")
