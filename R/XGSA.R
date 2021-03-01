@@ -66,7 +66,8 @@ require(GO.db)
 require(graph)
 
 ##########################
-# When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version
+# When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version. You can use the following command once the package has been loaded:
+# assignInNamespace(x = "hostID", ns = "xgsa", value = "asia.ensembl.org")
 
 #' @title xgsa_params
 #' @rdname xgsa_params
@@ -77,9 +78,12 @@ require(graph)
 #'
 biomartID <- "ENSEMBL_MART_ENSEMBL"
 
-#hostID <-  "www.ensembl.org"
+hostID <-  "www.ensembl.org"
 #hostID <-  "asia.ensembl.org"
-hostID <-  "aug2017.archive.ensembl.org"
+#hostID <-  "aug2020.archive.ensembl.org"
+
+# When Ensembl move servers (rarely) or it is down (less rare) these variable may need to be changed, for example to an archived version. You can use the following command once the package has been loaded:
+# assignInNamespace(x = "hostID", ns = "xgsa", value = "asia.ensembl.org")
 
 #' @title find_supported_datasets
 #'
