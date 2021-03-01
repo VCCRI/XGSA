@@ -12,9 +12,9 @@
 
   biomartID <- "ENSEMBL_MART_ENSEMBL"
 
-  #hostID <-  "www.ensembl.org"
+  hostID <-  "www.ensembl.org"
   #hostID <-  "asia.ensembl.org"
-  hostID <-  "aug2017.archive.ensembl.org"
+  #hostID <-  "aug2017.archive.ensembl.org"
 
   supportedSpecies <<- find_supported_datasets()
 
